@@ -1,0 +1,10 @@
+
+# BeautifulSoup4 is used to convert README.md into index.html
+beautifulsoup4>=4.9.1
+
+# Markdown is used to convert README.md into index.html
+Markdown>=3.2.2
+
+# Tornado is fairly lightweight and very simple to use.
+# Tornado should not be the front-facing webserver! A reverse proxy is used.
+tornado>=6.0.3

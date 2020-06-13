@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+	<meta charset="utf-8"/>
+	<title>systemd.software readme</title>
+</head>
+<body><h1><a href="https://github.com./inetknght/systemd.software"><code>systemd.software</code></a></h1>
+<p>I am a software developer by nature and a system administrator by necessity. As
+such I find <code>systemd</code> to be far too complex for my taste. I learn by doing: I
+copy examples and then read documentation about things used before adjusting
+what gets pasted.</p>
+<p>I also find <code>systemd</code> documentation to be a nightmare. In particular, the url to
+the documentation on freedesktop.org is annoying to type or remember. So
+instead, I figure it'd be handy to have a shorter URL to remember.</p>
+<p>I also included some <a href="https://systemd.software/examples">examples</a> for using
+<code>systemd</code> to augment your software on Linux. Eventually I'll write a generator
+for wrapping applications into common configurations that are described in the
+examples.</p>
+<p><a href="https://github.com./inetknght/systemd.software">This repository</a> contains
+artifacts for the <a href="https://systemd.software/"><code>systemd.software</code></a> web redirector
+service, templates, examples, and configuration for the domain.</p>
+<h1>instructions common to all or most configuration files</h1>
+<p><a href="https://systemd.software/directives">https://systemd.software/directives</a></p>
+<p><code>systemd</code> configuration files follow a syntax similar to INI files. A lot of the
+types of configuration files have common parameters. Instead of duplicating the
+documentation everywhere, those common parameters are described under the
+"directives" section.</p>
+<h1>Basic service file documentation</h1>
+<p><a href="https://systemd.software/services">https://systemd.software/services</a></p>
+<p>Services tell <code>systemd</code> how to run a program. The program could be long-running
+like a daemon but doesn't have to be. It can be configured to run automatically
+at boot or as a dependency when another service starts up. It can be
+automatically restarted. You can tell it what environment variables to use.</p>
+<h1>Socket service file documentation</h1>
+<p><a href="https://systemd.software/sockets">https://systemd.software/sockets</a></p>
+<p><code>systemd</code> is capable of setting up listening sockets and then starting your
+programs on-demand instead of pre-emptively. These types of services are
+described by <code>.socket</code> files. These are configuration files, not <a href="https://en.wikipedia.org./wiki/Unix_domain_socket">Unix Socket
+Domain</a> socket files so don't
+get confused by the file suffix.</p>
+<p>Frankly I haven't used these so I'm not totally
+familiar with getting them working. Please help by creating a
+<a href="https://github.com./inetknght/systemd.software">pull request</a> with example(s)!
+I'd be particularly interested in learning how to use this with Unix Domain
+Sockets.</p>
+<h1>Filesystem mount documentation</h1>
+<p><a href="https://systemd.software/mounts">https://systemd.software/mounts</a></p>
+<p><code>systemd</code> can be used to describe your filesystems. That's handy, I guess.
+Mounts are another thing I've never used. But I'm pretty interested to learn
+if it can handle loopback devices to an image. If so I'll probably add an
+example for a <code>fedora.iso</code> and a <code>raspbian.img</code>, since those are particularly
+relevant to my interests. I'm also interested in learning if it can be used to
+manage <code>sshfs</code> mounts.</p>
+<p>I assume it can manage your typical nonsense like <code>nfs</code>, <code>ext4</code>, <code>ntfs</code>, and
+<code>luks</code>. But you know what they say about assumptions.</p>
+<h1>Automatically-mounted filesystems</h1>
+<p><a href="https://systemd.software/automounts">https://systemd.software/automounts</a></p>
+<p>Apparently <code>systemd</code> mounts... aren't automatically mounted? That seems dumb.
+So there's these <code>.automount</code> to solve that. I don't know why that's not part
+of <code>.mount</code>. Who the hell made this shit up?</p>
+<h1>"Links" (networks)</h1>
+<p><a href="https://systemd.software/links">https://systemd.software/links</a></p>
+<p>I frequently forget that NetworkManager's <code>nmcli</code> isn't part of <code>systemd</code>.
+Indeed, <code>systemd</code> describes networks using <code>.link</code> files. I've read that there's
+a lot of strife between the two types of network management services.</p>
+<p>Frankly I think <code>nmcli</code> is garbage. But I've already learned it enough to use it
+passably. I hope <code>.link</code> is easier. I miss <code>ifup</code> and <code>ifdown</code> scripts :'(</p>
+<p>If it makes it easier to manage a <a href="https://wireguard.com./">WireGuard</a> interface that'd be great.</p></body></html>

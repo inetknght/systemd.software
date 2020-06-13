@@ -1,0 +1,26 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>systemd examples</title></head>
+<body>
+<p>I get it. <code>systemd</code> is really complex and confusing. A lot of people, including myself, learn best by example. I'm basically just a glorified script kiddie.</p>
+<br>
+<p>Here's some quick pointers:<ul>
+	<li><p>You want to put  <code><i>your.service</i></code> file in the directory returned by <b><code>pkg-config systemd --variable systemdsystemunitdir</code></b>. Any time you add, edit, or remove files under here, you must call <b><code>systemctl daemon-reload</code></b> or systemd will bitch at you.</p></li>
+	<li><p><code>ExecStart</code> and <code>ExecStop</code> are executed directly, not via a shell. <code>systemd</code> has <a href="https://unix.stackexchange.com/a/216786/128494">a shitty parameter expansion feature</a> and it might make you think that it supports all of your shell's features. Protip: it doesn't. If you want something complex, put it into a shell script with a <a href="https://en.wikipedia.org/wiki/Shebang_(Unix)">shebang</a> and execute the absolute path. Bash, Python, and PHP files prefixed with a shebang work wonders here! Make sure your script is executable (<code>chmod +x</code>).</p></li>
+	<li><p>You want to make sure your programs aren't running as root if they don't need to. Fill out the <code>User=</code> field in the <code>[Service]</code> section.</p></li>
+	<li><p>Debug your shit with <b><code>systemctl status -l --no-pager <i>your.service</i></code></b> and <b><code>journalctl -l --no-pager -u <i>your.service</i></code></b>. The <code>--no-pager</code> bit is important if you're writing scripts because <code>systemd</code> is a fucking bitch. The <code>-l</code> tells <code>systemd</code> not to truncate your logs. Because, again, <code>systemd</code> is a goddamn fucking bitch.</b></p></li>
+</ul></p>
+<br>
+<p>So without further ado, here are some examples</p>
+<ul>
+	<li><p><code>tmux</code> with <code>systemd</code> is a pretty handy piece of duct tape for programs that want a terminal window that you want to have available at startup. Here are a few examples.</p><ul>
+		<li>Start a TMUX session as my user at boot</a> and <code>echo hello world</code> into it.<ul><code>
+			<li><a href="tmux-hello-world/tmux-hello-world.service">tmux-hello-world.service</a></li>
+			<li><a href="tmux-hello-world/tmux-hello-world-start.bash">tmux-hello-world-start.bash</a></li>
+			<li><a href="tmux-hello-world/tmux-hello-world-stop.bash">tmux-hello-world-stop.bash</a></li>
+		</code></ul></li>
+	</ul></li>
+</ul>
+<br>
+<p>Want to <del>clean up my foul language</del> add your own examples? Create a <a href="https://github.com./inetknght/systemd.software">pull request</a>.</p>
+</body>
+</html>
+
