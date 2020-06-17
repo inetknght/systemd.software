@@ -10,10 +10,12 @@ After=network.target
 # {simple,forking}
 # default: simple
 Type=simple
+
 #
 # Don't run web stuff as root
 # default: root
 User=systemd.software
+
 #
 # {no,on-success,on-failure,on-abnormal,on-watchdog,on-abort,always}
 # default: no
@@ -23,8 +25,9 @@ User=systemd.software
 Restart=on-failure
 
 #
-# Tempting to use `tmux` for funsies. Needs a forking type though with ExecStop=
-ExecStart=python3 /srv/systemd.software/www.systemd.software.py
+# What a long line. Tempting to turn this into a bash script. Make sure to initialize the venv which isn't commited to the repo:
+# python3 -m venv /srv/systemd.software/venv && /srv/systemd.software/venv/bin/python3 -m pip install -r /srv/systemd.software/requirements.txt
+ExecStart=/srv/systemd.software/venv/bin/python3 /srv/systemd.software/www.systemd.software.py --log-file-prefix=/srv/systemd.software/log/systemd.software.log --logging=info --listen-path=/srv/systemd.software/reverse-proxy.socket
 #
 # Git root
 WorkingDirectory=/srv/systemd.software

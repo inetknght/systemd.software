@@ -1,0 +1,24 @@
+
+#
+# venvs should not be added to repo. create one and install reqs:
+# python3 -m venv path/to/venv && path/to/venv/bin/python3 -m pip install -r path/to/requirements.txt
+**/venv/
+
+#
+# __pycache__ contains compiled python garbage
+**/__pycache__/
+
+#
+# www/ contains the compiled output for the site. in general, stuff shouldn't be committed here
+# use `git add -f www/path/to/file` to force it
+www/
+
+#
+# The python script drops logs in here. If this is a plain dir, that's bad.
+# Protip: use a symlink to /var/log/www.systemd.software/
+log/
+
+#
+# Not a service unit file. This is the Unix Domain Socket for nginx.
+reverse-proxy.socket
+

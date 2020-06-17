@@ -4,9 +4,15 @@ import tornado.ioloop
 import tornado.web
 import tornado.template
 import tornado.escape
-import tornado.options
 
-# Python is an awful language for this lol
+from tornado.options import options
+from tornado.options import parse_command_line
+from tornado.options import define as define_opt
+
+from lib.tornado_uds_app import Application
+
+define_opt("listen-path", type=str, help="Path to the socket for nginx to talk to me", default=None)
+define_opt("listen-port", type=str, help="Port number for TCP listen for nginx to talk to me", default=None)
 
 class Redirector(tornado.web.RequestHandler):
     REDIRECT_TARGET = 'https://github.com/inetknght/systemd.software'
@@ -108,7 +114,7 @@ class NetworkCtl(rbnl):
     pass
 
 def make_app():
-    return tornado.web.Application([
+    return Application([
         # Root
         (r"/", SystemDSoftwareRoot),
         #
@@ -144,6 +150,13 @@ def make_app():
     )
 
 if __name__ == "__main__":
+    tornado.options.parse_command_line()
     app = make_app()
-    app.listen(63001, address='127.0.0.1')
+    if None != options.listen_path:
+        app.listen(uds_path = options.listen_path)
+    else:
+        if None != options.listen_port:
+            app.listen(port = options.listen_port)
+        else:
+            raise RuntimeError("use --listen-path or --listen-port")
     tornado.ioloop.IOLoop.current().start()
