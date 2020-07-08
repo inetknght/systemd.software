@@ -24,13 +24,13 @@ service, templates, examples, and configuration for the domain.</p>
 types of configuration files have common parameters. Instead of duplicating the
 documentation everywhere, those common parameters are described under the
 "directives" section.</p>
-<h1>Basic service file documentation</h1>
+<h2>Basic service file documentation</h2>
 <p><a href="https://systemd.software/services">https://systemd.software/services</a></p>
 <p>Services tell <code>systemd</code> how to run a program. The program could be long-running
 like a daemon but doesn't have to be. It can be configured to run automatically
 at boot or as a dependency when another service starts up. It can be
 automatically restarted. You can tell it what environment variables to use.</p>
-<h1>Socket service file documentation</h1>
+<h2>Socket service file documentation</h2>
 <p><a href="https://systemd.software/sockets">https://systemd.software/sockets</a></p>
 <p><code>systemd</code> is capable of setting up listening sockets and then starting your
 programs on-demand instead of pre-emptively. These types of services are
@@ -42,7 +42,7 @@ familiar with getting them working. Please help by creating a
 <a href="https://github.com./inetknght/systemd.software">pull request</a> with example(s)!
 I'd be particularly interested in learning how to use this with Unix Domain
 Sockets.</p>
-<h1>Filesystem mount documentation</h1>
+<h2>Filesystem mount documentation</h2>
 <p><a href="https://systemd.software/mounts">https://systemd.software/mounts</a></p>
 <p><code>systemd</code> can be used to describe your filesystems. That's handy, I guess.
 Mounts are another thing I've never used. But I'm pretty interested to learn
@@ -52,16 +52,96 @@ relevant to my interests. I'm also interested in learning if it can be used to
 manage <code>sshfs</code> mounts.</p>
 <p>I assume it can manage your typical nonsense like <code>nfs</code>, <code>ext4</code>, <code>ntfs</code>, and
 <code>luks</code>. But you know what they say about assumptions.</p>
-<h1>Automatically-mounted filesystems</h1>
+<h2>Automatically-mounted filesystems</h2>
 <p><a href="https://systemd.software/automounts">https://systemd.software/automounts</a></p>
 <p>Apparently <code>systemd</code> mounts... aren't automatically mounted? That seems dumb.
 So there's these <code>.automount</code> to solve that. I don't know why that's not part
 of <code>.mount</code>. Who the hell made this shit up?</p>
-<h1>"Links" (networks)</h1>
+<h2>"Links" (networks)</h2>
 <p><a href="https://systemd.software/links">https://systemd.software/links</a></p>
 <p>I frequently forget that NetworkManager's <code>nmcli</code> isn't part of <code>systemd</code>.
 Indeed, <code>systemd</code> describes networks using <code>.link</code> files. I've read that there's
 a lot of strife between the two types of network management services.</p>
 <p>Frankly I think <code>nmcli</code> is garbage. But I've already learned it enough to use it
 passably. I hope <code>.link</code> is easier. I miss <code>ifup</code> and <code>ifdown</code> scripts :'(</p>
-<p>If it makes it easier to manage a <a href="https://wireguard.com./">WireGuard</a> interface that'd be great.</p></body></html>
+<p>If it makes it easier to manage a <a href="https://wireguard.com./">WireGuard</a> interface
+that'd be great.</p>
+<h1><code>systemd</code> commands</h1>
+<h2><code>systemctl</code> - Manage your OS.</h2>
+<p><a href="https://systemd.software/systemctl">https://systemd.software/systemctl</a></p>
+<p><code>systemctl</code> is used to manage your OS. It comes in two parts; primarily it
+manages the services. Secondarily you use it it to tell your physical machine
+to reboot.</p>
+<h3>Service Statuses</h3>
+<ul>
+<li><code>enabled</code>: service will start automatically (at boot or when needed)</li>
+<li><code>disabled</code>: service will not start automatically (unless it's a dependency)</li>
+<li><code>masked</code>: service will refuse to start (even if it's a dependency)</li>
+<li><code>unmasked</code>: opposite of masked</li>
+<li><code>started</code>: service is running</li>
+<li><code>stopped</code>: service <em>was</em> running but finished.</li>
+<li><code>error</code>: service started but exited for a reason that its unit file describes
+  as a failure. If any service is in this state, then <code>systemctl status</code> will
+  show <code>State: degraded</code>. Figuring out what service(s) failed isn't intuitive.</li>
+<li><code>inactive</code>: uhhh I think it's just another word for "not started"? I'm not
+  sure</li>
+</ul>
+<p><code>systemctl</code> <em>can</em> be used to look at the logs for individual services. But
+<code>journalctl</code> is a better tool for that.</p>
+<h3>tl;dr</h3>
+<ul>
+<li>system status: <code>systemctl status --no-pager</code></li>
+<li>show failed services: <code>systemctl --state=failed --no-pager</code></li>
+<li>clear failure state of service: <code>systemctl reset-failed unit.service</code>
+  (<a href="https://unix.stackexchange.com/a/418797/128494">from Unix StackExchange</a>)</li>
+<li>reboot: <code>systemctl reboot --now</code></li>
+</ul>
+<h2><code>journalctl</code> - Logs.</h2>
+<p><a href="https://systemd.software/journalctl">https://systemd.software/journalctl</a></p>
+<p><code>journalctl</code> manages the <em>system journal</em>. The journal is just a fancy way of
+saying logs. Why not use the word <code>diary</code> instead? Whatever.</p>
+<p>tl;dr:</p>
+<ul>
+<li>Specific service's logs: <code>journalctl -u unit.service</code></li>
+<li>All logs since current boot: <code>journalctl -b --no-pager</code></li>
+<li>List what boots still have logs: <code>journalctl --list-boots</code></li>
+</ul>
+<p>Stupid people use <code>-x</code>.</p>
+<h2><code>machinectl</code> - Virtual Machine and Container management</h2>
+<p><a href="https://systemd.software/machinectl">https://systemd.software/machinectl</a></p>
+<p><code>machinectl</code> manages... "machines"; virtual machines and containers. I've never
+used it. Feel free to add some examples: I'm quite interested in learning
+competitors to VirtualBox.</p>
+<h2><code>networkctl</code> - NIC management (competes with Network Manager's <code>nmcli</code>)</h2>
+<p><a href="https://systemd.software/networkctl">https://systemd.software/networkctl</a></p>
+<p><code>networkctl</code> competes with Network Manager. I haven't used it. It looks like it
+works with the <a href="https://systemd.software/links"><code>.link</code></a> files.</p>
+<h2><code>resolvectl</code> - Control how your DNS works</h2>
+<p><a href="https://systemd.software/resolvectl">https://systemd.software/resolvectl</a></p>
+<p>The system resolver is way more complicated than it needs to be. It's especially
+confounding when you're using Docker to build images -- Docker makes its own
+<code>/etc/resolv.conf</code> file inside of the containers. GRRRRR</p>
+<h1>Things that aren't actually part of <code>systemd</code></h1>
+<p><code>systemd</code> has, in my opinion by its very name and stated goals, convoluted what
+other system services are and can do.</p>
+<h2><code>nmcli</code> - Network Manager (CLI)</h2>
+<p><a href="https://systemd.software/nmcli">https://systemd.software/nmcli</a></p>
+<p>Network Manager organizes NICs into <em>Layer 2 physical devices</em> and <em>Layer 3
+logical connections</em>. Generally think of them as layer 2 can be powered on or
+off, plugged in or not, etc while layer 3 controls IP configuration. You "can"
+change the layer 3 configuration without changing the layer 2 status.</p>
+<h3>tl;dr</h3>
+<p><code>nmcli</code> is bash autocompletion friendly.</p>
+<p>Changes made to configurations are not applied immediately. If you change
+something then it's easiest to bring the device or connection offline and then
+back online.</p>
+<ul>
+<li>show layer 2 device status: <code>nmcli d</code></li>
+<li>show layer 3 connection status: <code>nmcli c</code></li>
+<li>bring device (and connection) offline: <code>nmcli d disconnect &lt;device&gt;</code></li>
+<li>bring connection (not device) offline: <code>nmcli c down &lt;connection&gt;</code></li>
+<li>show device configuration: <code>nmcli d show &lt;device&gt;</code></li>
+<li>show connection config: <code>nmcli c show &lt;connection&gt;</code></li>
+</ul>
+<h2><code>firewalld</code> - "Dynamic Firewall Manager"</h2>
+<p><a href="https://systemd.software/firewalld">https://systemd.software/firewalld</a></p></body></html>

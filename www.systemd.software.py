@@ -42,6 +42,13 @@ class NetworkManagerCLI(Redirector):
     # (use REDIRECT_LEARN_MORE ... )
     REDIRECT_TARGET = 'https://developer.gnome.org/NetworkManager/stable/nmcli.html'
 
+class FirewallD(Redirector):
+    # `firewalld` provides `firewall-cmd`
+    # but `firewalld` isn't part of systemd. Or, at least, it isn't part of
+    # the documentation under freedesktop.org. I don't 100% know. I do know it's
+    # a wrapper around iptables and I don't know iptables very well.
+    REDIRECT_TARGET = 'https://firewalld.org/documentation/man-pages/firewalld'
+
 class RedirectorWithBase(Redirector):
     REDIRECT_BASE = 'https://systemd.software/'
     REDIRECT_TARGET = "index.html"
@@ -112,6 +119,8 @@ class MachineCtl(rbnl):
     pass
 class NetworkCtl(rbnl):
     pass
+class ResolveCtl(rbnl):
+    pass
 
 def make_app():
     return Application([
@@ -121,7 +130,7 @@ def make_app():
         # Manual pages, non-commands
         (r"/env(?:ironment)?s?", _Environment),
         (r"/(?:hier|file(?:s|-hierarch(?:y|ies)?)|filesystem|director(?:y|ies)?)", _FileHierarchy),
-        (r"/daemon", Daemon),
+        (r"/d(?:ae|ea|e|a)mon", Daemon),
         (r"/(?:positive|dnssec)", _Positive),
         #
         # Manuals for unit files
@@ -142,9 +151,11 @@ def make_app():
         (r"/(?:system(?:cn?tl|control)?)", SystemCtl),
         (r"/(?:machine(?:cn?tl|control)?)", MachineCtl),
         (r"/(?:network(?:cn?tl|control)?)", NetworkCtl), # See also systemd.link
+        (r"/(?:resolve?(?:cn?tl|control)?)", ResolveCtl),
         #
         # Misnomers
-        (r"/nmcli", NetworkManagerCLI)
+        (r"/nmcli", NetworkManagerCLI),
+        (r"/firewall(?:d|-(?:(?:(?:offline-)?(?:cmd|command))|config|cfg))?", FirewallD),
     ],
         template_path = "templates"
     )
