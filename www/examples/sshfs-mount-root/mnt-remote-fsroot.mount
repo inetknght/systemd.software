@@ -3,7 +3,7 @@
 #
 
 [Unit]
-Description=user@192.168.1.1:/ at /mnt/remote/fsroot
+Description=/mnt/remote/fsroot -> user@192.168.1.1:/
 Requires=network.target
 BindsTo=network.target
 After=network.target
@@ -12,8 +12,8 @@ After=network.target
 WantedBy=multi-user.target
 
 [Mount]
-What=user@192.168.1.1:/
 Where=/mnt/remote/fsroot
+What=user@192.168.1.1:/
 Type=fuse.sshfs
 #
 # ssh-keygen example:

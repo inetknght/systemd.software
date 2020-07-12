@@ -19,7 +19,22 @@
 		</code></ul></li>
 	</ul></li>
 	<li><p><code>sshfs</code> is cool. Use <code>systemd</code> to mount <code>ssh</code>/<code>sftp</code>-accessible stuff at boot.</p><ul>
-		<li>Mount the ssh-remote <code>user@192.168.1.1:/</code> onto my local <code>/mnt/remote/fsroot</code>, authorized by SSH key at <code>/root/.ssh/user@192.168.1.1.id_rsa</code>.<ul><code>
+		<li>A bunch of options are inherited from <code>ssh_config</code>. Some of the more useful options:<ul>
+			<li><code>_netdev</code>: <a href="https://unix.stackexchange.com/a/331688/128494">tells systemd that it's a network mount</a>. That's important so that it doesn't hang at boot when trying to mount things before the network interfaces are online.</li>
+			<li><code>Port=22</code>: connect to the SSH server on this TCP port.</li>
+			<li><a href="https://serverfault.com/a/639735/245340">Automatically reconnecting</a> is useful. If the connection dies with outstanding IO, the process(es) with open files should see an error indication from their file descriptor.<ul>
+				<li><code>reconnect</code>: <code>sshfs</code> will automatically reconnect if the connection dies.</li>
+				<li><code>ServerAliveInterval=15</code>: after 15 seconds of no network activity, send a ping to the server on the <code>ssh</code> protocol.</li>
+				<li><code>ServerAliveCountMax=3</code>: after 3 missed <code>ssh</code>-protocol pings, consider the connection to be dead.</li>
+			</ul></li>
+			<li>Authentication is important.<ul>
+				<li><code>IdentityFile=/path/to/secret/key</code>: authorize using the specified encryption key. I'm not sure how to specify a passphrase to unlock it if one is necessary. I <i>believe</i> the key will be accessed using the <code>root</code> user.</li>
+			</ul></li>
+			<li>You could consider <code>sshfs</code> to work in two "modes". The first mode allows the local access to the remote only by the user who set up the connection. The second allows access based on matching the UID/GID of the local and remote; no mapping is done, so there's a one-to-one exact match.<ul>
+				<li><code>allow_other</code>: <a href="https://serverfault.com/a/294120/245340">opt-in to the kernel's FUSE driver to perform UID/GID permission validation</a>. You might also <a href="https://superuser.com/a/262800/403994">need to set <code>user_allow_other</code> in <code>/etc/fuse.conf</code></a>.</li>
+			</ul></li>
+		</ul></li>
+		<li>At my local <code>/mnt/remote/fsroot</code> -&gt; mount the ssh-remote <code>user@192.168.1.1:/</code> -&gt; authorized by SSH key at <code>/root/.ssh/user@192.168.1.1.id_rsa</code>.<ul><code>
 			<li><a href="sshfs-mount-root/mnt-remote-fsroot.mount">mnt-remote-fsroot.mount</a></li>
 		</code></ul></li>
 	</ul></li>
@@ -28,4 +43,3 @@
 <p>Want to <del>clean up my foul language</del> add your own examples? Create a <a href="https://github.com./inetknght/systemd.software">pull request</a>.</p>
 </body>
 </html>
-
