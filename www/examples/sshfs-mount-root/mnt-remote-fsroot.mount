@@ -1,0 +1,28 @@
+# This file must be named similar to `[Mount]` section's `Where` field.
+# Forward slashes must be replaced with dashes.
+#
+
+[Unit]
+Description=user@192.168.1.1:/ at /mnt/remote/fsroot
+Requires=network.target
+BindsTo=network.target
+After=network.target
+
+[Install]
+WantedBy=multi-user.target
+
+[Mount]
+What=user@192.168.1.1:/
+Where=/mnt/remote/fsroot
+Type=fuse.sshfs
+#
+# ssh-keygen example:
+# - Any key type is permissible. Everyone seems to use RSA. I prefer ed25519.
+# - If you use RSA remember to select the bitsize using -b
+# - Always use the "newer format" with -o
+# - Always encipher the file with -a. It's a moot thing with an empty passphrase though, -N ""
+# - One keyfile per remote is good but specifying the remote user@host in the filename is poor practice.
+# ssh-keygen -t rsa -b 4096 -o -a 1000 -N "" -f /root/.ssh/user@192.168.1.1.id_rsa
+#
+# I don't know how to pass the passphrase to sshfs using systemd.
+Options=_netdev,allow_other,Port=22,IdentityFile=/root/.ssh/user@192.168.1.1.id_rsa,reconnect

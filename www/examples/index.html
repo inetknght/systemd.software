@@ -12,10 +12,15 @@
 <p>So without further ado, here are some examples</p>
 <ul>
 	<li><p><code>tmux</code> with <code>systemd</code> is a pretty handy piece of duct tape for programs that want a terminal window that you want to have available at startup. Here are a few examples.</p><ul>
-		<li>Start a TMUX session as my user at boot</a> and <code>echo hello world</code> into it.<ul><code>
+		<li>Start a TMUX session as my user at boot and <code>echo hello world</code> into it.<ul><code>
 			<li><a href="tmux-hello-world/tmux-hello-world.service">tmux-hello-world.service</a></li>
 			<li><a href="tmux-hello-world/tmux-hello-world-start.bash">tmux-hello-world-start.bash</a></li>
 			<li><a href="tmux-hello-world/tmux-hello-world-stop.bash">tmux-hello-world-stop.bash</a></li>
+		</code></ul></li>
+	</ul></li>
+	<li><p><code>sshfs</code> is cool. Use <code>systemd</code> to mount <code>ssh</code>/<code>sftp</code>-accessible stuff at boot.</p><ul>
+		<li>Mount the ssh-remote <code>user@192.168.1.1:/</code> onto my local <code>/mnt/remote/fsroot</code>, authorized by SSH key at <code>/root/.ssh/user@192.168.1.1.id_rsa</code>.<ul><code>
+			<li><a href="sshfs-mount-root/mnt-remote-fsroot.mount">mnt-remote-fsroot.mount</a></li>
 		</code></ul></li>
 	</ul></li>
 </ul>
