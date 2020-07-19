@@ -1,45 +1,121 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>systemd examples</title></head>
-<body>
-<p>I get it. <code>systemd</code> is really complex and confusing. A lot of people, including myself, learn best by example. I'm basically just a glorified script kiddie.</p>
-<br>
-<p>Here's some quick pointers:<ul>
-	<li><p>You want to put  <code><i>your.service</i></code> file in the directory returned by <b><code>pkg-config systemd --variable systemdsystemunitdir</code></b>. Any time you add, edit, or remove files under here, you must call <b><code>systemctl daemon-reload</code></b> or systemd will bitch at you.</p></li>
-	<li><p><code>ExecStart</code> and <code>ExecStop</code> are executed directly, not via a shell. <code>systemd</code> has <a href="https://unix.stackexchange.com/a/216786/128494">a shitty parameter expansion feature</a> and it might make you think that it supports all of your shell's features. Protip: <a href="https://www.freedesktop.org/software/systemd/man/systemd.service#Command%20lines">it doesn't</a>. If you want something complex, put it into a shell script with a <a href="https://en.wikipedia.org/wiki/Shebang_(Unix)">shebang</a> and execute the absolute path. Bash, Python, and PHP files prefixed with a shebang work wonders here! Make sure your script is executable (<code>chmod +x</code>).</p></li>
-	<li><p>You want to make sure your programs aren't running as root if they don't need to. Fill out the <code>User=</code> field in the <code>[Service]</code> section.</p></li>
-	<li><p>Debug your shit with <b><code>systemctl status -l --no-pager <i>your.service</i></code></b> and <b><code>journalctl -l --no-pager -u <i>your.service</i></code></b>. The <code>--no-pager</code> bit is important if you're writing scripts because <code>systemd</code> is a fucking bitch. The <code>-l</code> tells <code>systemd</code> not to truncate your logs. Because, again, <code>systemd</code> is a goddamn fucking bitch.</b></p></li>
-</ul></p>
-<br>
-<p>So without further ado, here are some examples</p>
+<!DOCTYPE html>
+<html lang="en"><head>
+	<meta charset="utf-8"/>
+	<title>systemd.software readme</title>
+</head>
+<body><p>I get it. <code>systemd</code> is really complex and confusing. A lot of people, including
+myself, learn best by example. I'm basically just a glorified script kiddie.</p>
+<h1>Quick Info</h1>
 <ul>
-	<li><p><code>tmux</code> with <code>systemd</code> is a pretty handy piece of duct tape for programs that want a terminal window that you want to have available at startup. Here are a few examples.</p><ul>
-		<li>Start a TMUX session as my user at boot and <code>echo hello world</code> into it.<ul><code>
-			<li><a href="tmux-hello-world/tmux-hello-world.service">tmux-hello-world.service</a></li>
-			<li><a href="tmux-hello-world/tmux-hello-world-start.bash">tmux-hello-world-start.bash</a></li>
-			<li><a href="tmux-hello-world/tmux-hello-world-stop.bash">tmux-hello-world-stop.bash</a></li>
-		</code></ul></li>
-	</ul></li>
-	<li><p><code>sshfs</code> is cool. Use <code>systemd</code> to mount <code>ssh</code>/<code>sftp</code>-accessible stuff at boot.</p><ul>
-		<li>A bunch of options are inherited from <code>ssh_config</code>. Some of the more useful options:<ul>
-			<li><code>_netdev</code>: <a href="https://unix.stackexchange.com/a/331688/128494">tells systemd that it's a network mount</a>. That's important so that it doesn't hang at boot when trying to mount things before the network interfaces are online.</li>
-			<li><code>Port=22</code>: connect to the SSH server on this TCP port.</li>
-			<li><a href="https://serverfault.com/a/639735/245340">Automatically reconnecting</a> is useful. If the connection dies with outstanding IO, the process(es) with open files should see an error indication from their file descriptor.<ul>
-				<li><code>reconnect</code>: <code>sshfs</code> will automatically reconnect if the connection dies.</li>
-				<li><code>ServerAliveInterval=15</code>: after 15 seconds of no network activity, send a ping to the server on the <code>ssh</code> protocol.</li>
-				<li><code>ServerAliveCountMax=3</code>: after 3 missed <code>ssh</code>-protocol pings, consider the connection to be dead.</li>
-			</ul></li>
-			<li>Authentication is important.<ul>
-				<li><code>IdentityFile=/path/to/secret/key</code>: authorize using the specified encryption key. I'm not sure how to specify a passphrase to unlock it if one is necessary. I <i>believe</i> the key will be accessed using the <code>root</code> user.</li>
-			</ul></li>
-			<li>You could consider <code>sshfs</code> to work in two "modes". The first mode allows the local access to the remote only by the user who set up the connection. The second allows access based on matching the UID/GID of the local and remote; no mapping is done, so there's a one-to-one exact match.<ul>
-				<li><code>allow_other</code>: <a href="https://serverfault.com/a/294120/245340">opt-in to the kernel's FUSE driver to perform UID/GID permission validation</a>. You might also <a href="https://superuser.com/a/262800/403994">need to set <code>user_allow_other</code> in <code>/etc/fuse.conf</code></a>.</li>
-			</ul></li>
-		</ul></li>
-		<li>At my local <code>/mnt/remote/fsroot</code> -&gt; mount the ssh-remote <code>user@192.168.1.1:/</code> -&gt; authorized by SSH key at <code>/root/.ssh/user@192.168.1.1.id_rsa</code>.<ul><code>
-			<li><a href="sshfs-mount-root/mnt-remote-fsroot.mount">mnt-remote-fsroot.mount</a></li>
-		</code></ul></li>
-	</ul></li>
+<li>
+<p>You want to put <em><code>your.service</code></em> file in the directory returned by
+  <strong><code>pkg-config systemd --variable systemdsystemunitdir</code></strong>. Any time you add,
+  edit, or remove files under here, you must call <strong><code>systemctl daemon-reload</code></strong>
+  or systemd will complain.</p>
+</li>
+<li>
+<p><code>ExecStart</code> and <code>ExecStop</code> are executed directly, not via a shell. <code>systemd</code>
+  has a <a href="https://unix.stackexchange.com/a/216786/128494">shitty parameter expansion feature</a>
+  and it might make you think that it supports all of your shell's features.
+  Protip: <a href="https://www.freedesktop.org/software/systemd/man/systemd.service#Command%20lines">it doesn't</a>.
+  If you want something complex, put it into a shell script with a <a href="https://en.wikipedia.org/wiki/Shebang_%28Unix%29">shebang</a>)
+  and execute the absolute path. Bash, Python, and PHP files prefixed with a
+  shebang work wonders here! Call the absolute path and make sure your script is
+  executable (<code>chmod +x</code>).</p>
+</li>
+<li>
+<p>You want to make sure your programs aren't running as root if they don't need
+  to. Fill out the <a href="https://www.freedesktop.org/software/systemd/man/systemd.exec.html#User="><code>User=</code></a>
+  field in the <code>[Service]</code> section. Make sure to <code>adduser</code> the name if you've
+  haven't already. <a href="https://www.freedesktop.org/software/systemd/man/systemd.exec.html#DynamicUser="><code>DynamicUser=</code></a>
+  sounds good but you're probably going to have all kinds of trouble with
+  filesystem permissions and <code>systemd</code> adds a bunch of other "oh yeahs" in an
+  effort to fix up security problems (because <code>systemd</code> doesn't follow the Unix
+  principle of "do one thing and do it well").</p>
+</li>
+<li>
+<p>Debug your shit with <strong><code>systemctl status -l --no-pager</code> <em><code>your.service</code></em></strong> and
+  <strong><code>journalctl -l --no-pager -u</code> <em><code>your.service</code></em></strong>. The <code>--no-pager</code> bit is
+  important if you're writing scripts because <code>systemd</code> changes its output based
+  on whether you're attached to a tty and makes it a royal pain in the ass to
+  write a script. The <code>-l</code> tells <code>systemd</code> not to truncate your logs for the
+  same reason.</p>
+</li>
 </ul>
-<br>
-<p>Want to <del>clean up my foul language</del> add your own examples? Create a <a href="https://github.com./inetknght/systemd.software">pull request</a>.</p>
-</body>
-</html>
+<h1>Examples</h1>
+<ul>
+<li>
+<p><code>tmux</code> with <code>systemd</code> is a pretty handy piece of duct tape for programs that
+  want a terminal window that you want to have available at startup.</p>
+<ul>
+<li>
+<p>Start a TMUX session as my user at boot and <code>echo hello world</code> into it.</p>
+<ul>
+<html><head></head><body><li><a href="tmux-hello-world/tmux-hello-world.service"><code>tmux-hello-world.service</code></a></li><li><a href="tmux-hello-world/tmux-hello-world-start.bash"><code>tmux-hello-world-start.bash</code></a></li><li><a href="tmux-hello-world/tmux-hello-world-stop.bash"><code>tmux-hello-world-stop.bash</code></a></li></body></html>
+</ul>
+</li>
+<li>
+<p>Some programs write log to stdout or stderr and don't have a way to
+    configure a log file. Some other programs are interactive.</p>
+<p><code>tmux</code> is a pretty handy wrapper for stuff like that. I particularly like
+to have a <code>tmux</code> session for such a program with one pane running that
+program in one window while piping the stdout and stderr through <code>tee</code> to
+some log files. Another scenario I've seen work well is to pipe the output
+directly to a log file and have another pane or two to just <code>tail</code> those
+files.</p>
+</li>
+</ul>
+</li>
+<li>
+<p><code>sshfs</code> is cool. Use <code>systemd</code> to mount <code>ssh</code>/<code>sftp</code>-accessible stuff at boot.</p>
+<ul>
+<li>
+<p>A bunch of options are inherited from <code>ssh_config</code>. Some of the more
+  useful options:</p>
+<ul>
+<li><code>_netdev</code>: <a href="https://unix.stackexchange.com/a/331688/128494">tells systemd that it's a network mount</a>.
+  That's important so that it doesn't hang at boot when trying to mount
+  things more the network interfaces are online.</li>
+<li><code>Port=22</code>: connect to the SSH server on this TCP port.</li>
+<li><a href="https://serverfault.com/a/639735/245340">Automatically reconnecting</a>
+  is useful. If the connection dies with outstanding IO, the process(es)
+  with open files should see an error indication from their file
+  descriptor.<ul>
+<li><code>reconnect</code>: <code>sshfs</code> will automatically reconnect if the
+  connection dies.</li>
+<li><code>ServerAliveInterval=15</code>: after 15 seconds of no network activity,
+  send a ping to the server on the ssh protocol.</li>
+<li><code>ServerAliveCountMax=3</code>: after 3 missed ssh-protocol pings,
+  consider the connection to be dead.</li>
+</ul>
+</li>
+<li>Authentication is important.<ul>
+<li><code>IdentityFile=/path/to/secret/key</code>: authorize using the specified
+  encryption key. I'm not sure how to specify a passphrase to unlock
+  it if one is necessary. I believe the key will be accessed using
+  the root user.</li>
+</ul>
+</li>
+<li>You could consider <code>sshfs</code> to work in two "modes". The first mode
+    allows the local access to the remote only by the user who set up
+    the connection. The second allows access based on matching the
+    UID/GID of the local and remote; no mapping is done, so there's a
+    one-to-one exact match.<ul>
+<li><code>allow_other</code>: <a href="https://serverfault.com/a/294120/245340">opt-in to the kernel's FUSE driver to perform UID/GID permission validation</a>.
+You might also <a href="https://superuser.com/a/262800/403994">need to set <code>user_allow_other</code> in <code>/etc/fuse.conf</code></a>.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>At my local <code>/mnt/remote/fsroot</code> -&gt; mount the ssh-remote
+    <code>user@192.168.1.1:/</code> -&gt; authorized by SSH key at
+    <code>/root/.ssh/user@192.168.1.1.id_rsa</code>.</p>
+<ul>
+<html><head></head><body><li><a href="sshfs-mount-root/mnt-remote-fsroot.mount"><code>mnt-remote-fsroot.mount</code></a></li></body></html>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>Want to add your own examples? Create a <a href="https://github.com/inetknght/systemd.software">pull request</a>.</p></body></html>

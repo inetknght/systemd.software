@@ -1,0 +1,41 @@
+[Unit]
+Description=tmux hello world
+Documentation=https://github.com/inetknght/systemd.software
+#
+# The `multi-user.target` is available when the system successfully boots.
+# It isn't available in Emergency Mode. Contrast with `network.target`.
+BindsTo=multi-user.target
+After=multi-user.target
+
+[Service]
+#
+# tmux will start and fork and leave systemd in the dust.
+Type=forking
+
+#
+# `whoami` or `adduser inetknght` or whatever
+User=inetknght
+
+# or /home/inetknght
+WorkingDirectory=/home/inetknght
+#
+# Running `systemctl start tmux-hello-world.service` will execute this.
+# You probably want `systemctl enable --now tmux-hello-world.service` though.
+# Contrast with `systemctl unmask tmux-hello-world.service`.
+#
+# systemd will look for this under the default PATHs.
+# I'm not sure how to configure those though. It's probably under the
+# Environments. https://systemd.software/environments
+ExecStart=tmux-hello-world-start.bash
+#
+# Running `systemctl stop tmux-hello-world.bash` will execute this.
+# You probably want `systemctl disable --now tmux-hello-world.service` though.
+# Contrast with `systemctl mask tmux-hello-world.service`.
+ExecStop=tmux-hello-world-stop.bash
+
+[Install]
+#
+# Frankly I'm not sure why this is needed. It feels redundant with `BindsTo`
+# and `After` in the `[Unit]` section above. I should probably read the
+# documentation closer.
+WantedBy=multi-user.target
