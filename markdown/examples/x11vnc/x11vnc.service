@@ -1,0 +1,17 @@
+[Unit]
+Description="x11vnc.inetknght"
+Requires=display-manager.service
+After=display-manager.service
+
+[Service]
+#
+# https://unix.stackexchange.com/a/405324/128494
+# Create a password file:
+# x11vnc -storepasswd supersecret /etc/x11vnc/x11vnc.pass
+ExecStart=/usr/bin/x11vnc -xkb -noxrecord -noxfixes -noxdamage -display :0 -auth guess -rfbauth /etc/x11vnc/x11vnc.pass -listen 127.0.0.1 -noipv6
+ExecStop=/usr/bin/killall x11vnc
+Restart=on-failure
+Restart-sec=2
+
+[Install]
+WantedBy=multi-user.target

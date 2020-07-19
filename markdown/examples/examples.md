@@ -89,4 +89,9 @@ myself, learn best by example. I'm basically just a glorified script kiddie.
         `/root/.ssh/user@192.168.1.1.id_rsa`.
         * [sshfs-mount-root](sshfs-mount-root)
 
+* `x11vnc` is a server daemon to mirror your X11 display over VNC. It doesn't
+    come with a systemd service though. So here's mine.
+
+    * [x11vnc](x11vnc)
+
 Want to add your own examples? Create a [pull request](https://github.com/inetknght/systemd.software).
