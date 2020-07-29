@@ -22,3 +22,6 @@ log/
 # Not a service unit file. This is the Unix Domain Socket for nginx.
 reverse-proxy.socket
 
+#Diff File
+*.diff
+
